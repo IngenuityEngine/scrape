@@ -1,0 +1,37 @@
+body {
+	font-family: sans-serif;
+}
+#controls {
+	width: 30%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	background: #eee;
+	border-right: 1px solid black;
+}
+#site {
+	width: 70%;
+	height: 100%;
+	position: absolute;
+	left: auto;
+	right: 0;
+	top: 0;
+}
+.label {
+	padding: 8px;
+}
+input, button, textarea{
+	padding: 8px;
+	border: 1px solid #eee;
+	width: 100%;
+}
+
+textarea{
+	height: 500px;
+}
+
+.ss1-similar{
+	color: red;
+	background: red;
+}
