@@ -1,9 +1,11 @@
 {
-	"name": "scrape",
-	"version": "0.0.1",
-	"description": "Screen Scrape content from the internet",
-	"dependencies": {
-		"express": "^4.12.0",
-		"lodash": "*"
-	}
+  "name": "scrape",
+  "version": "0.0.1",
+  "description": "Screen Scrape content from the internet",
+  "dependencies": {
+    "async": "*",
+    "express": "^4.12.0",
+    "http-get": "^0.5.10",
+    "lodash": "*"
+  }
 }

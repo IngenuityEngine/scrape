@@ -9,22 +9,21 @@ $(document).ready(function()
 
 var helpers = {
 
-getTarget: function(event)
-{
-	return $(event.target ||
-				event.currentTarget ||
-				event.relatedTarget ||
-				event.toElement)
-},
-getName: function(elem)
-{
-	return elem.prop('tagName').toLowerCase() + '.' +
-		elem.prop('class') + '\n'
+	getTarget: function(event)
+	{
+		return $(event.target ||
+					event.currentTarget ||
+					event.relatedTarget ||
+					event.toElement)
+	},
+	getElementInfo: function(elem)
+	{
+		return elem.prop('tagName').toLowerCase() + '.' +
+			elem.prop('class') + '\n'
+	},
 }
 
-}
-
-$("#site").load(function()
+$('#site').load(function()
 {
 	console.log('Site ready to go')
 	var iframeDoc = $('body iframe').contents()
@@ -40,7 +39,7 @@ $("#site").load(function()
 		var parents = target.parentsUntil('body')
 		parents.each(function()
 		{
-			name = helpers.getName($(this)) + name
+			name = helpers.getElementInfo($(this)) + name
 		})
 		$('#target').val(name)
 	}
