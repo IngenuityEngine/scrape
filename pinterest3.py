@@ -10,16 +10,8 @@ from PySide import QtWebKit
 
 class Scraper(QtCore.QObject):
 
-	exportDir = ''
-
 	def __init__(self, parent=None):
 		super(Scraper, self).__init__(parent)
-
-	def setExportDir(self, exportDir):
-		self.exportDir = exportDir
-
-	def getSavePath(self, name):
-		return os.path.join(self.exportDir, name) + '.jpg'
 
 	@QtCore.Slot(str)
 	def log(self, text):
@@ -34,16 +26,6 @@ class Scraper(QtCore.QObject):
 		print 'Done scrolling!'
 		self.parent().downloadPins()
 
-	@QtCore.Slot(str, str)
-	def download(self, path, name):
-		savePath = self.getSavePath(name)
-		print 'Downloading:', path, 'to:', savePath
-		# only download stuff that doesn't already exist
-		if not os.path.isfile(savePath):
-			urllib.urlretrieve(path, savePath)
-
-		self.parent().downloadPins()
-
 	@QtCore.Slot(str)
 	def setPinUrls(self, pinUrls):
 		self.parent().setPinUrls(pinUrls.split(';'))
@@ -52,6 +34,7 @@ class Browser(QtGui.QDialog):
 
 	pinUrls = []
 	scrollingEnabled = False
+	exportDir = ''
 	boardIndex = 0
 	boardUrls = ['https://www.pinterest.com/blented/interior-design/',
 'https://www.pinterest.com/blented/future-tech/',
@@ -111,8 +94,8 @@ class Browser(QtGui.QDialog):
 		widget = QtGui.QLabel('Export Directory:')
 		widget.setAlignment(QtCore.Qt.AlignRight)
 		gridLayout.addWidget(widget, row, 0)
-		self.exportDir = QtGui.QLineEdit('c:/google drive/reference/pinterest/')
-		gridLayout.addWidget(self.exportDir, row, 1)
+		self.exportDirEdit = QtGui.QLineEdit('c:/google drive/reference/pinterest/')
+		gridLayout.addWidget(self.exportDirEdit, row, 1)
 		row += 1
 
 		self.downloadButton = QtGui.QPushButton('Download Boards')
@@ -200,8 +183,8 @@ class Browser(QtGui.QDialog):
 		self.scrollingEnabled = True
 		boardUrl = self.boardUrls[self.boardIndex]
 		self.pinUrls = []
-		exportDir = os.path.join(self.exportDir.text(), boardUrl.split('/')[-2])
-		self.scraper.setExportDir(exportDir)
+		exportDir = os.path.join(self.exportDirEdit.text(), boardUrl.split('/')[-2])
+		self.setExportDir(exportDir)
 		try:
 			os.makedirs(exportDir)
 		except OSError:
@@ -212,18 +195,18 @@ class Browser(QtGui.QDialog):
 		self.loadPage(boardUrl)
 
 	def downloadPins(self):
-		print 'Pins remaining:', len(self.pinUrls)
-		if not len(self.pinUrls):
-			return self.downloadBoards()
+		for i, pin in enumerate(self.pinUrls):
+			print 'Pins remaining:', (len(self.pinUrls) - i)
 
-		# don't download pins that we've already downloaded
-		url = 'https://www.pinterest.com' + self.pinUrls.pop()
-		pinID = url[30:-1]
-		if os.path.isfile(self.scraper.getSavePath(pinID)):
-			print pinID, 'already exists. Skipping download.'
-			return self.downloadPins()
+			# don't download pins that we've already downloaded
+			url = 'https://www.pinterest.com' + pin
+			pinID = url[30:-1]
+			if os.path.isfile(self.getSavePath(pinID)):
+				print pinID, 'already exists. Skipping download.'
+				continue
+			self.downloadPinImage(url)
 
-		self.downloadPinImage(url)
+		self.downloadBoards()
 
 	def downloadPinImage(self, url):
 		html = urllib.urlopen(url).read()
@@ -235,7 +218,20 @@ class Browser(QtGui.QDialog):
 			return
 
 		imageUrl = imageUrl[0][1:-1]
-		self.scraper.download(imageUrl, url[30:-1])
+		self.download(imageUrl, url[30:-1])
+
+	def setExportDir(self, exportDir):
+		self.exportDir = exportDir
+
+	def getSavePath(self, name):
+		return os.path.join(self.exportDir, name) + '.jpg'
+
+	def download(self, path, name):
+		savePath = self.getSavePath(name)
+		print 'Downloading:', path, 'to:', savePath
+		# only download stuff that doesn't already exist
+		if not os.path.isfile(savePath):
+			urllib.urlretrieve(path, savePath)
 
 	def pageLoad(self):
 		print 'Page Loaded'
